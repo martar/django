@@ -4,7 +4,7 @@ MySQL database backend for Django.
 Requires MySQLdb: http://sourceforge.net/projects/mysql-python
 """
 
-import datetime
+#import datetime
 import re
 import sys
 import warnings
@@ -24,7 +24,7 @@ if (version < (1,2,1) or (version[:3] == (1, 2, 1) and
     from django.core.exceptions import ImproperlyConfigured
     raise ImproperlyConfigured("MySQLdb-1.2.1p2 or newer is required; you have %s" % Database.__version__)
 
-from MySQLdb.converters import conversions, Thing2Literal
+from MySQLdb.converters import conversions
 from MySQLdb.constants import FIELD_TYPE, CLIENT
 
 from django.db import utils
@@ -55,6 +55,15 @@ def parse_datetime_with_timezone_support(value):
         dt = dt.replace(tzinfo=timezone.utc)
     return dt
 
+
+'''
+This method uses Thing2Literal, whose import couses error while handled by appengine's
+sql cloud backend.
+According to this:
+https://code.djangoproject.com/changeset/17596/django/trunk/django/db/backends/mysql/base.py
+it is used only by raw sql. So i decide i don't need it.
+'''
+'''
 def adapt_datetime_with_timezone_support(value, conv):
     # Equivalent to DateTimeField.get_db_prep_value. Used only by raw SQL.
     if settings.USE_TZ:
@@ -66,7 +75,7 @@ def adapt_datetime_with_timezone_support(value, conv):
             value = timezone.make_aware(value, default_timezone)
         value = value.astimezone(timezone.utc).replace(tzinfo=None)
     return Thing2Literal(value.strftime("%Y-%m-%d %H:%M:%S"), conv)
-
+'''
 # MySQLdb-1.2.1 returns TIME columns as timedelta -- they are more like
 # timedelta in terms of actual behavior as they are signed and include days --
 # and Django expects time, so we still need to override that. We also need to
@@ -80,7 +89,8 @@ django_conversions.update({
     FIELD_TYPE.DECIMAL: util.typecast_decimal,
     FIELD_TYPE.NEWDECIMAL: util.typecast_decimal,
     FIELD_TYPE.DATETIME: parse_datetime_with_timezone_support,
-    datetime.datetime: adapt_datetime_with_timezone_support,
+    
+    #datetime.datetime: adapt_datetime_with_timezone_support,
 })
 
 # This should match the numerical portion of the version numbers (we can treat

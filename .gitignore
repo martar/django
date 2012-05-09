@@ -1,3 +1,7 @@
+.metadata
+.project
+.pydevproject
+
 *.egg-info
 *.pot
 *.py[co]
